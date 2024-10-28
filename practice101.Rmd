@@ -1,0 +1,6 @@
+---
+title: "Practice1.1"
+author: "Hugo van den Belt"
+date: "2024-10-28"
+output: html_document
+---
