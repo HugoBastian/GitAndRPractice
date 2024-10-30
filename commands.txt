@@ -1,7 +1,20 @@
 git
 
-  
-  
+  log
+    shows log of git updates
+    
+  status
+    shows status of repository
+    
+  add .
+    adds files to staging area (. adds all files, can also only do specific file)
+    
+  commit -m 'message/description of changes made'
+    record changes
+    
+  push 
+    send changes to remote server (GitHub) after committing 
+    
   remote -v
     verbose; checks connection with remote git repository
 
@@ -22,7 +35,7 @@ other
   mv oldname.ext newname.ext
     change document name
     
-  mv dir/dir/olddir dir/dir/newdir
+  mv "dir/dir/olddir" "dir/dir/newdir"
     change folder name/directory name
     
     
