@@ -1,0 +1,30 @@
+git
+
+  
+  
+  remote -v
+    verbose; checks connection with remote git repository
+
+other
+  
+  touch filename.ext
+    new file + extension
+    
+  ls
+    list of files in directory
+    
+  pwd
+    see working directory
+    
+  cd "directory"
+    change working directory
+  
+  mv oldname.ext newname.ext
+    change document name
+    
+  mv dir/dir/olddir dir/dir/newdir
+    change folder name/directory name
+    
+    
+    
+  
