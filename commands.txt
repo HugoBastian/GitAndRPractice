@@ -20,14 +20,19 @@ git
       connect to an existing repository
     -v
       verbose; checks connection with remote git repository
+    remove origin
+      remove connection to github repo
+    set-url origin <git://new.url.here>
+      directly set new github connection instead of removing one and adding again
   
   pull
     pulls info from existing repository
   
+  
+  
 
 other
   
-  touch filename.ext
     new file + extension
     
   ls
