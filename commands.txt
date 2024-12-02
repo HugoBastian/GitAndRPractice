@@ -15,8 +15,15 @@ git
   push 
     send changes to remote server (GitHub) after committing 
     
-  remote -v
-    verbose; checks connection with remote git repository
+  remote 
+    add origin <repository_link>
+      connect to an existing repository
+    -v
+      verbose; checks connection with remote git repository
+  
+  pull
+    pulls info from existing repository
+  
 
 other
   
@@ -37,6 +44,7 @@ other
     
   mv "dir/dir/olddir" "dir/dir/newdir"
     change folder name/directory name
+    
     
     
     
