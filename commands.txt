@@ -32,8 +32,11 @@ git
   
 
 other
-  
+  touch filename.ext
     new file + extension
+  
+  rm filename.ext
+    removes existing file
     
   ls
     list of files in directory
