@@ -1,4 +1,6 @@
-git
+ ______________
+ |git commands|
+ --------------
 
   log
     shows log of git updates
@@ -30,8 +32,10 @@ git
   
   
   
+ ___________________________
+ |general terminal commands|
+ ---------------------------
 
-other
   touch filename.ext
     new file + extension
   
