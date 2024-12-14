@@ -1,0 +1,155 @@
+---
+title: "Practice1.1"
+author: "Hugo van den Belt"
+date: "2024-10-28"
+output: html_document
+---
+
+#R Practice
+This is just some random practice
+
+
+## RMarkdown formatting
+```{r}
+# Header 1
+## Header 2
+### Header 3
+
+# Bold: **bold text** or __bold text__
+# Italic: *italic text* or _italic text_
+```
+
+## R Markdown kb shortcuts
+
+* Insert a new code chunk: Cmd + Option + I
+* Run the current chunk: Cmd + Shift + Enter
+* Run all chunks above: Cmd + Option + P
+* Comment/Uncomment line or selection: Cmd + Shift + C
+* Knit document: Cmd + Shift + K
+
+
+## R Syntax Notes
+c() = concatenate
+  Basically the same as making a Tuple in python but in R they call it a vector;
+    - Computationally efficient
+    - They're ordered
+    - can have duplicates
+    However, vectors are
+    - mutable
+    - meant for elements of the same type
+      - R will convert all to character type if a string is in the vector:
+      
+```{r}
+mixed <- c(1, "hello", TRUE)  # becomes: "1" "hello" "TRUE"
+
+print(mixed)
+```
+
+list() = really just a python list
+
+%>% = pipe variable   
+  Perform multiple operations on a variable. Pretty neat
+
+
+
+##Practice
+     
+First import libraries
+
+```{r}
+library(dplyr)
+library(ggplot2)
+library(tidyr)
+library(lubridate)
+```
+
+
+create synthetic data for sales for example
+
+```{r}
+sales_data <- data.frame(
+  date = seq(as.Date("2023-01-01"), as.Date("2023-12-31"), by = "day"),
+  revenue = runif(365, 1000, 5000),  # Random revenues between 1000 and 5000
+  category = sample(c("Electronics", "Clothing", "Food"), 365, replace = TRUE)
+)
+```
+
+
+aggregation with dplyr grouping by month and category, then calculate various summary statistics
+```{r}
+monthly_summary <- sales_data %>%
+  mutate(month = floor_date(date, "month")) %>%  # Convert dates to monthly buckets
+  group_by(month, category) %>%
+  summarise(
+    total_revenue = sum(revenue),
+    avg_daily_revenue = mean(revenue),
+    n_days = n()
+  )
+```
+
+
+this is how you make a function in R
+```{r}
+custom_function <- function(x, power = 2) {
+  result <- x^power
+  return(result)
+}
+```
+
+
+different data structrures
+```{r}
+vector_practice <- c(1:100)  # numeric vector
+matrix_practice <- matrix(1:25, nrow = 5)  # x5 matrix
+list_practice <- list(
+  numbers = 1:5,
+  text = c("a", "b", "c"),
+  mixed = list(1, "x", TRUE)  # Nested list with different data types
+)
+```
+
+make plot with ggplot
+```{r}
+basic_plot <- ggplot(monthly_summary, aes(x = month, y = total_revenue, color = category)) +
+  geom_line() +
+  theme_minimal() +
+  labs(title = "Monthly Revenue by Category")
+
+print(basic_plot)
+```
+
+
+correlation and eigenvalues
+```{r}
+correlation_matrix <- cor(matrix(rnorm(100), ncol = 4))  # Create correlation matrix
+eigenvalues <- eigen(correlation_matrix)$values  # Calculate eigenvalues
+
+print(correlation_matrix)
+print(eigenvalues)
+```
+
+
+You can create random values without an additional library 
+```{r}
+simulated_data <- data.frame(
+  x = rnorm(1000),  # Generate random x values
+  y = rnorm(1000)   # Generate random y values
+)
+
+print(simulated_data)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
