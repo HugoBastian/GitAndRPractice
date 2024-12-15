@@ -5,3 +5,143 @@ date: "2024-12-14"
 output: html_document
 ---
 
+
+## R Plotting Setup Notes
+
+Basic visualization setup in R using two key libraries:
+- `ggplot2`: Main graphics package for creating plots
+- `kableExtra`: Package for enhanced table formatting in documents
+
+The command `theme_set(theme_gray(15))` sets default plot styling with gray background and 15pt font. Other useful themes include `theme_minimal()`, `theme_bw()`, `theme_classic()`.
+
+**Note: Include `{r plots_and_figures, include=FALSE}` at start of code chunk to run setup without showing code in final document.**
+```{r plots_and_figures, include=FALSE}
+library(ggplot2)
+library(kableExtra)
+
+theme_set(theme_gray(15))
+```
+
+
+## viewing DataFrames
+reading a flat file
+```{r}
+CEO_Diary <- read.csv("/Users/hugovandenbelt/Documents/GitHub/GROUP_ASSIGNMENT/survey_response_data.csv")
+```
+
+head item (4 rows)
+```{r}
+head(CEO_Diary, 4)
+```
+
+can also tail
+```{r}
+tail(CEO_Diary, 10)
+```
+
+
+## Subsetting
+You can subset a df very easily using square brackets, with the input `[rows, columns]`
+
+```{r}
+CEO_Diary[1:10,c(1:5,37, 39:42)] # Shows rows 1 through 10, and colums 1 through 5, 37, and 39 through 42
+```
+
+`:` slices (includes lower and upper limit)
+
+The `apply()` function lets you apply a function across a data frame or matrix, either by rows or columns. It takes three main arguments:
+
+1. The data frame/matrix (in this case, CEO_Diary)
+2. A number indicating direction (1 for rows, 2 for columns)
+3. The function to apply (in this case, class)
+
+with our df this would look like:
+
+```{r}
+apply(CEO_Diary, 2, class)
+```
+
+and with a simpler df it could look like this:
+
+```{r}
+# sample data frame
+sample_df <- data.frame(
+    name = c("Alice", "Bob"),        
+    age = c(25, 30),              
+    active = c(TRUE, FALSE)        
+)
+
+# Apply class function to each column
+apply(sample_df, 2, class)
+```
+
+For some reason it identifies all columns as characters. Why?
+
+Apparently, when we apply the `apply()` function, R converts our df into a matrix, but in a matrix every element must be of the same type. We can use the `sapply()` function to see the classes directly:
+
+```{r}
+sapply(sample_df, class)
+sapply(CEO_Diary, class)
+```
+
+## Some statistics
+
+we can get the number of rows 
+
+```{r}
+nrow(CEO_Diary)
+```
+
+let me guess, we can get the number of columns by doing ncolumn or something
+
+```{r}
+ncol(CEO_Diary) # indeed
+```
+
+
+We can get summary statistics
+
+```{r}
+summary(CEO_Diary[1:10]) # Columns 1 through 10
+```
+
+
+Create a frequency table of a certain column
+```{r}
+table(CEO_Diary$finance)
+table(CEO_Diary$n_functions)
+```
+The `$` operator selects columns
+
+
+Building on this, we can view proportions
+```{r}
+prop.table(table(CEO_Diary$type))
+```
+
+
+we can visualise the proportions with a barplot
+
+```{r}
+barplot(prop.table(table(CEO_Diary$n_functions)))
+```
+
+
+## MODELING TIME
+
+we can fit a linear model with chosen variables
+```{r}
+fit <- glm(strategy ~ consultants + politicians, data=CEO_Diary)
+summary(fit)
+```
+
+The presence of consultants *increases* the probability of the meeting being about strategy. 
+The presence of politicians *decreases* the probability of the meeting being about strategy. 
+
+We can add as many independents as we'd like
+```{r}
+fit_all <- glm(strategy ~ consultants + politicians + journalists + unions + investors + lawyers, data=CEO_Diary)
+
+summary(fit_all)
+```
+

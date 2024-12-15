@@ -10,7 +10,7 @@ Each weekly folder includes:
 - **Practice Files:** Files where I've implemented and modified Dr. Kapoor's R code examples.
 - **Learning Notes:** Key takeaways and notes on specific functions or coding techniques.
 
-Week0 contains files relating to general practice with R, GitHub, and terminal
+`Week0` contains files relating to general practice with R, GitHub, and terminal
 
 ## Objective
 

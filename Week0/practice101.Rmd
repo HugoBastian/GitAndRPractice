@@ -5,7 +5,7 @@ date: "2024-10-28"
 output: html_document
 ---
 
-#R Practice
+# R Practice
 This is just some random practice
 
 
@@ -17,6 +17,8 @@ This is just some random practice
 
 # Bold: **bold text** or __bold text__
 # Italic: *italic text* or _italic text_
+
+# `file.txt` highlights 
 ```
 
 ## R Markdown kb shortcuts
@@ -45,6 +47,19 @@ mixed <- c(1, "hello", TRUE)  # becomes: "1" "hello" "TRUE"
 print(mixed)
 ```
 
+YOU CAN COMPILE PYTHON CODE IN RMARKDOWN!!
+so basically this can be used as a IPYNB
+```{python}
+from time import sleep as s
+from random import randint
+
+for i in range(10):
+  print(' ' * randint(1,15) + '*' + ' ' * randint(1,15))
+  s(0.2)
+```
+this looks nicer in terminal :/
+
+
 list() = really just a python list
 
 %>% = pipe variable   
@@ -52,7 +67,7 @@ list() = really just a python list
 
 
 
-##Practice
+## Practice
      
 First import libraries
 
