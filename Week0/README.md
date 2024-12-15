@@ -13,4 +13,4 @@
 - Terminal commands to interact with GitHub
 - Terminal commands to interact with directories
 
-I will update this file as I learn more
+I will update this folder as I learn more
