@@ -1,0 +1,242 @@
+---
+title: "Practice Week 2"
+author: "Hugo van den Belt"
+date: "2024-12-16"
+output: html_document
+---
+
+# Uncertainty
+
+## Bootstraps w/ python
+
+I do not fully understand why we get a different distribution when we draw n observations (with replacement) from a distribution n observations. Shouldn't we just get the same distribution? I asked Claude AI to generate the following python code (python because I understand it better). I added an input function for the number of desired bootstraps.
+
+Edit: Nevermind, input functions don't work in md files (just like in IPYNB)
+
+I try this estimation with:
+* 1000 samples and array [10, 20, 30, 40, 50]
+* 10.000 samples
+* 100.000 samples
+* the above but with array [10, 20, 30, 40, 50, 50, 50]
+
+
+```{python}
+import numpy as np
+from collections import Counter
+
+# Set a random seed for reproducibility
+np.random.seed(42)
+
+# Create our original sample - let's use 5 numbers for clarity
+original_sample = np.array([10, 20, 30, 40, 50, 50, 50])
+print("Original sample:", original_sample)
+
+# Create several bootstrap samples
+n_bootstraps = 5
+sample_size = len(original_sample)
+
+print("\nLet's look at 5 different bootstrap samples:")
+for i in range(n_bootstraps):
+    # Generate one bootstrap sample
+    bootstrap_sample = np.random.choice(original_sample, size=sample_size, replace=True)
+    
+    # Count how many times each value appears
+    value_counts = Counter(bootstrap_sample)
+    
+    # Create a formatted string showing counts
+    counts_str = ", ".join(f"{val}({count}x)" for val, count in sorted(value_counts.items()))
+    
+    print(f"\nBootstrap sample {i+1}:")
+    print(f"Values (count): {counts_str}")
+    print(f"Missing values: {set(original_sample) - set(bootstrap_sample)}")
+
+# Let's also look at how often values are missing
+print("\nLet's simulate 1000 bootstrap samples and see how often values are missing:")
+n_large_simulation = 1000
+missing_counts = {val: 0 for val in original_sample}
+
+for _ in range(n_large_simulation):
+    bootstrap_sample = np.random.choice(original_sample, size=sample_size, replace=True)
+    for val in original_sample:
+        if val not in bootstrap_sample:
+            missing_counts[val] += 1
+
+print(f"\nNumber of times each value was missing out of {n_large_simulation} samples:")
+for val, count in missing_counts.items():
+    percentage = count / n_large_simulation * 100
+    print(f"Value {val}: missing in {count} samples ({percentage:.1f}%)")
+```
+
+with 1000 bootstraps, there is some variability in the frequency a value is missing (between 31 and 35 percent of cases).
+
+when the number of bootstraps increases, the percentage of missing values converges. Is there such a thing as too many bootstraps?
+
+
+I wanna see this in a histogram
+```{python}
+import matplotlib.pyplot as plt
+
+original_mean = np.mean(original_sample)
+bootstrap_means = np.zeros(n_large_simulation)
+
+for i in range(n_large_simulation):
+    bootstrap_sample = np.random.choice(original_sample, size=sample_size, replace=True)
+    bootstrap_means[i] = np.mean(bootstrap_sample)
+
+# Calculate some statistics about the bootstrap distribution
+bootstrap_std = np.std(bootstrap_means)
+confidence_interval = np.percentile(bootstrap_means, [2.5, 97.5])
+
+# Create the histogram
+plt.figure(figsize=(10, 6))
+plt.hist(bootstrap_means, bins=30, density=True, alpha=0.7, color='skyblue')
+plt.axvline(original_mean, color='red', linestyle='--', label='Original Mean')
+plt.axvline(confidence_interval[0], color='green', linestyle=':', label='95% CI')
+plt.axvline(confidence_interval[1], color='green', linestyle=':')
+
+plt.title(f'Distribution of Bootstrap Sample Means\n({n_large_simulation} resamples)')
+plt.xlabel('Sample Mean')
+plt.ylabel('Density')
+plt.legend()
+
+# Add text box with statistics
+stats_text = f'Original Mean: {original_mean:.1f}\n'
+stats_text += f'Bootstrap SE: {bootstrap_std:.1f}\n'
+stats_text += f'95% CI: [{confidence_interval[0]:.1f}, {confidence_interval[1]:.1f}]'
+plt.text(0.02, 0.98, stats_text, transform=plt.gca().transAxes, 
+         verticalalignment='top', bbox=dict(boxstyle='round', facecolor='white', alpha=0.8))
+
+plt.grid(True, alpha=0.3)
+plt.show()
+
+# Print the statistics as well
+print("\nSummary Statistics:")
+print(stats_text)
+```
+
+
+After a lot of debugging, this looks pretty. I understand now (I think); because we take the mean of every bootstrap, we get many different possible values for the mean, even though our original data only had a few distinct values. Each bootstrap sample can contain different combinations and frequencies of the original values, and when we average these different combinations, we get new numbers that weren't in our original dataset. When we have a skew in our original sample, that skew will be present in the bootstrap distribution (but less pronounced)
+
+
+
+**Now to Dr. Kapoor's code**
+## Frequentist vs Bootstrap
+
+```{r}
+browser <- read.csv("/Users/hugovandenbelt/Desktop/Data Science Data Sets/web-browsers.csv")
+dim(browser)
+head(browser)
+```
+
+the `dim()` functions returns info about the dimensions of a dataset
+
+
+```{r}
+mean(browser$spend)
+var(browser$spend)/1e4
+sqrt(var(browser$spend)/1e4)
+```
+
+make a bootstrap algo
+
+```{r}
+B <- 1000
+  mub <- c()
+  for (b in 1:B){
+    samp_b <- sample.int(nrow(browser), replace=TRUE)
+    mub <- c(mub, mean(browser$spend[samp_b]))
+  }
+  sd(mub)
+```
+
+we get a slightly different estimate every time we run this.
+
+```{r}
+  h <- hist(mub)
+  xfit <- seq(min(mub), max(mub), length = 40) 
+  yfit <- dnorm(xfit, mean = mean(browser$spend), sd = sqrt(var(browser$spend)/1e4)) 
+  yfit <- yfit * diff(h$mids[1:2]) * length(mub) 
+  #can you explain why we need each term in the last expression? 
+  lines(xfit, yfit, col = "black", lwd = 2)
+```
+
+We need each term in the last expression because the initial yfit values are probability densities that sum to 1, so we multiply by the bin width (diff(h$mids[1:2])) to match the histogram's scale and by the number of observations (length(mub)) to scale up the density to match the total area of the histogram bars.
+
+```{r}
+  B <- 1000
+  betas <- c()
+  for (b in 1:1000){
+    samp_b <- sample.int(nrow(browser), replace=TRUE)
+    reg_b <- glm(log(spend) ~ broadband + anychildren, data=browser[samp_b,])
+    betas <- rbind(betas, coef(reg_b))
+  }; head(betas, n=5)
+```
+
+```{r}
+cov(betas[,"broadband"], betas[,"anychildren"])
+```
+
+
+## BH Algorithm
+### Example 1
+
+```{r}
+spendy <- glm(log(spend) ~ . -id, data=browser)
+round(summary(spendy)$coef,4)
+```
+
+rewrote the code a bit so it actually outputs the graph
+```{r}
+pval <- summary(spendy)$coef[-1, "Pr(>|t|)"]  # this reemoves the intercept p-value
+pvalrank <- rank(pval)
+reject <- pval < (0.001/9)*pvalrank
+plot(pvalrank, pval, ylab="p-value", xlab="p-value rank", pch=19, col=ifelse(reject, "red", "black"))
+lines(pvalrank, (0.001/9)*pvalrank)
+```
+
+The same number of variables are significant under the BH Algorithm with q = 0.1 as under the normal alpha criterion. Same goes for q = 0.05. However, with q = 0.01, only 3 variables are significant while under the alpha criterion there would be 4.
+
+
+### Example 2
+
+```{r}
+SC <- read.csv("/Users/hugovandenbelt/Desktop/Data Science Data Sets/semiconductor.csv")
+dim(SC)
+```
+
+```{r}
+full <- glm(FAIL ~ ., data=SC, family=binomial) # the dot makes you include all the variables in the dataset
+pvals <- summary(full)$coef[-1,4] #-1 to drop the intercept
+hist(pvals, xlab="p-value", main="", col="lightblue")#looks like we have some
+```
+
+```{r}
+fdr_cut <- function(pvals, q){
+  pvals <- sort(pvals[!is.na(pvals)])
+  N <- length(pvals)
+  k <- rank(pvals, ties.method="min")
+  alpha <- max(pvals[ pvals<= (q*k/(N+1)) ])
+  
+  plot(pvals, log="xy", xlab="order", main=sprintf("FDR of %g",q),
+   ylab="p-value", bty="n", col=c(8,2)[(pvals<=alpha) + 1], pch=20)
+  lines(1:N, q*(1:N)/(N+1))
+
+  return(alpha)
+}
+
+fdr_cut(pvals, q=0.1)
+fdr_cut(pvals, q=0.05)
+fdr_cut(pvals, q=0.01)
+```
+
+The choice of p-value matters a lot; with q=0.01 there's only 4 significant coefficients left.
+
+
+
+
+
+
+
+
+
+
